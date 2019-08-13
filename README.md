@@ -78,6 +78,43 @@
    （2）jdk和cglib 最根本的区别 jdk是实现接口，cglib 是继承接口
    
   为什么JDK动态代理中要求目标类实现的接口数量不能超过65535个？
+  class文件是一组8字节为基础的二进制流，interface_count占2字节。也就是16.00000000,00000000 所以，证明
+  interface_count的数量最多是2^16次方 最大值=65535
+  
+  
+  
+  jdk动态代理原理:$Proxy
+      读取接口的信息，反射。
+      1.拿到被代理类的引用，并且获取它所有的接口(反射获取)
+      2.JDK Proxy类重新生成一个新的类， 实现了被代理类所有接口中的方法
+      3.动态生成Java代码，把增强逻辑加入到新生成代码中。
+      4.编译生成新的Java代码。
+      5.加载并重新运行新的class，得到类就是全新类。
+  
+  cglib
+      使用asm框架，直接写字节码
+      可以代理一个普通的类
+      坑:final方法不能代理
+  
+  jdk vs cglib
+      1.jdk动态代理是实现了被代理对象的接口，cglib是继承了被代理对象
+      2.jdk和cglib都是在运行期生成字节码
+          jdk是直接写class字节码
+          cglib使用asm框架写class,cglib代理实现更复杂，生成代理类比jdk效率低。
+      3.jdk调用代理方法，是通过反射机制调用，
+          cglib是通过FastClass机制直接调用方法，cglib执行效率更高
+  
+  Spring中的代理选择原则
+      1.当Bean有实现接口时，Spring就会用jdk动态代理
+      2.当Bean没有实现接口时，Spring选择cglib
+      3.Spring可以通过配置强制使用cglib，只需在Spring配置文件中加入代码:
+          <aop:aspectj-autoproxy proxy-target-class="true"/>
+  
+  代理模式优点
+      1.代理模式能将代理对象与真实被调用的目标对象分离
+      2.一定程度上降低了系统的耦合程度，易于扩展
+      3.代理可以起到保护目标对象的作用
+      4.增强目标对象的职责
 
 
 
